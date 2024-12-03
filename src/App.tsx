@@ -1,33 +1,49 @@
 import { useState, useEffect } from "react";
 
-import { getMovieDetails, Movie, MovieDetailsData, searchMovies } from "./api/movies.api";
+import {
+  getMovieDetails,
+  Movie,
+  MovieDetailsData,
+  searchMovies,
+} from "./api/movies.api";
 
 import MovieCard from "./components/MovieCard";
 import MovieDetails from "./components/MovieDetails";
 
 import SearchIcon from "./assets/search.svg";
 
-
 const App = () => {
-  const [searchTerm, setSearchTerm] = useState<string>("x-men"); // Search term input
+  const [searchTerm, setSearchTerm] = useState<string>(""); // Search term input
   const [movies, setMovies] = useState<Movie[]>([]); // List of movies
-  const [selectedMovie, setSelectedMovie] = useState<MovieDetailsData | null>(null); // Selected movie
+  const [selectedMovie, setSelectedMovie] = useState<MovieDetailsData | null>(
+    null
+  ); // Selected movie
 
   // Fetch default movies on mount
   useEffect(() => {
+    // setSearchTerm("x-men")
     handleSearch();
   }, []);
 
   const handleSearch = async () => {
-    const response = await searchMovies(searchTerm);
+    const response = searchTerm
+      ? await searchMovies(searchTerm)
+      : await searchMovies("x-men");
+    // const response = await searchMovies("x-men");
     setMovies(response);
   };
-  
+
   const handleMovieClick = async (imdbID: string) => {
     const movieDetails = await getMovieDetails(imdbID);
     setSelectedMovie(movieDetails);
   };
 
+  const handleKeyDown = (event: { key: string; }) => {
+    console.log("enter is preseed")
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center py-16 bg-blue-500 min-h-screen">
@@ -40,12 +56,14 @@ const App = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search for movies"
+          onKeyDown={handleKeyDown}
         />
         <img
           src={SearchIcon}
           alt="search"
           className="w-8 h-8 cursor-pointer"
           onClick={handleSearch}
+         
         />
       </div>
 
